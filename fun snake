@@ -1,0 +1,142 @@
+var FOOD_DELAY = 6000;
+var FOOD_RADIUS = 5;
+var FOOD_COLOR = Color.red;
+
+
+var SNAKE_WIDTH = 10;
+var SNAKE_HEIGHT = 10;
+var SNAKE_DIM = 10;
+var SNAKE_COLOR = Color.green;
+
+//Directions
+var currentDirection;
+var NORTH = 0;
+var EAST = 1;
+var SOUTH = 2;
+var WEST = 3;
+
+var dx = 0;
+var dy = 0;
+var snake;
+var bounces;
+var food;
+var elemFood;
+
+
+function start(){
+    drawSnake();
+    setTimer(snakeMovement,40);
+    keyDownMethod(keyDown);
+    drawFood();
+    setTimer(drawFood,FOOD_DELAY);
+    eatFood();
+}
+function drawSnake(){
+    snake = new Rectangle(SNAKE_DIM,SNAKE_DIM);
+    snake.setPosition(getWidth()/2-snake.width/2,getHeight()/2-snake.height/2);
+	snake.setColor(SNAKE_COLOR);
+	add(snake);
+}
+function drawSnakeBody(){
+    var slitther = new Rectangle(SNAKE_DIM,SNAKE_DIM);
+    slitther.setPosition(snake.getX(),snake.getY());
+    slitther.setColor(SNAKE_COLOR);
+    add(slitther);
+}
+function snakeMovement(){
+    snake.move(dx,dy);
+    drawSnakeBody();
+    borders();
+    collision();
+}
+function keyDown(e){
+    if(e.keyCode == Keyboard.letter('A')){
+        dx = -4;
+        dy =  0;
+        currentDirection = WEST;
+    }
+    if(e.keyCode == Keyboard.letter('D')){
+        dx =  4;
+        dy =  0;
+        currentDirection = EAST;
+    }
+    if(e.keyCode == Keyboard.letter('W')){
+        dx =  0;
+        dy =  -4;
+        currentDirection = NORTH;
+    }
+    if(e.keyCode == Keyboard.letter('S')){
+        dx =  0;
+        dy =  4;
+        currentDirection = SOUTH;
+    }
+}
+function borders(){
+    if(snake.getX() > getWidth()){
+        snake.setPosition(0,snake.getY());
+    }
+    if(snake.getX() < 0){
+        snake.setPosition(getWidth(),snake.getY());
+    }
+    if(snake.getY() > getHeight()){
+        snake.setPosition(snake.getX(),0);
+    }
+    if(snake.getY() < 0){
+        snake.setPosition(snake.getX(),getHeight());
+    }
+}
+function collision(){
+    //Bounds based apon rectangle head
+    var elemN = getElementAt(snake.getX(), snake.getY()-1);
+    var elemE = getElementAt(snake.getX()+SNAKE_DIM+1,snake.getY());
+    var elemS = getElementAt(snake.getX(), snake.getY()+SNAKE_DIM+1);
+    var elemW = getElementAt(snake.getX()-SNAKE_DIM-1, snake.getY());
+    
+    if(currentDirection == NORTH && elemN !=null && elemN.getColor() == SNAKE_COLOR){
+        gameover();
+    }else if(currentDirection == SOUTH && elemS !=null && elemS.getColor() == SNAKE_COLOR){
+        gameover();
+    }else if(currentDirection == EAST && elemE !=null && elemE.getColor() == SNAKE_COLOR){
+        gameover();
+    }else if(currentDirection == WEST && elemW !=null && elemW.getColor() == SNAKE_COLOR){
+        gameover();
+    }
+    eatFood();
+}
+function gameover(){
+    println("CRASH");
+    stopTimer(snakeMovement);
+}
+function drawFood(){
+    var x = Randomizer.nextInt(0,getWidth());
+    var y = Randomizer.nextInt(0,getHeight());
+    food = new Circle(FOOD_RADIUS);
+    food.setPosition(x,y);
+    food.setColor(FOOD_COLOR);
+    add(food);
+    elemFood = getElementAt(food.getX(), food.getY());
+    if(elemFood == null){
+        add(food);
+    }
+}
+function eatFood(){
+    var elemN = getElementAt(snake.getX(), snake.getY()-1);
+    var elemE = getElementAt(snake.getX()+SNAKE_DIM+1,snake.getY());
+    var elemS = getElementAt(snake.getX(), snake.getY()+SNAKE_DIM+1);
+    var elemW = getElementAt(snake.getX()-SNAKE_DIM-1, snake.getY());
+    
+    
+    if(elemN != null && currentDirection==NORTH && elemN.getColor()==FOOD_COLOR){
+        println("ATE FOOD");
+        remove(elemN);
+    }else if(elemE != null && currentDirection==NORTH && elemE.getColor()==FOOD_COLOR){
+        println("ATE FOOD");
+        remove(elemE);
+    }else if(elemS != null && currentDirection==NORTH && elemS.getColor()==FOOD_COLOR){
+        println("ATE FOOD");
+        remove(elemS);
+    }else if(elemW != null && currentDirection==NORTH && elemW.getColor()==FOOD_COLOR){
+        println("ATE FOOD");
+        remove(elemW);
+    }
+}
